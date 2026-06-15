@@ -1,5 +1,5 @@
 [build]
-builder = "NIXPACKS"
+builder = "Staticfile"
 
 [deploy]
-startCommand = "sh start.sh"
+startCommand = "npx serve -s . -p $PORT --no-clipboard"
