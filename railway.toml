@@ -1,5 +1,5 @@
 [build]
-builder = "Staticfile"
+builder = "NIXPACKS"
 
 [deploy]
-startCommand = "npx serve -s . -p $PORT --no-clipboard"
+startCommand = "python3 -m http.server $PORT"
