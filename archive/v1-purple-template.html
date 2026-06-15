@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mononium — AI Photobooth voor Event Agencies</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:        #0A0A0F;
+    --ink-soft:   #3D3D4F;
+    --ink-muted:  #7B7B8F;
+    --surface:    #FFFFFF;
+    --surface-2:  #F6F6FA;
+    --border:     #E2E2EC;
+    --accent:     #7C3AED;
+    --accent-lt:  #EDE9FE;
+    --accent-dk:  #5B21B6;
+    --green:      #059669;
+    --green-lt:   #D1FAE5;
+    --radius:     10px;
+  }
+
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: #EDEDF8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── PAGE SHELL ── */
+  .page {
+    max-width: 820px;
+    margin: 28px auto;
+    background: var(--surface);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 40px rgba(124,58,237,0.10), 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    padding: 52px 56px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(124,58,237,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 28%;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(217,119,6,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 34px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1.3px;
+    line-height: 1.13;
+    max-width: 580px;
+    margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: normal; color: #A78BFA; }
+
+  .hero-sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.62);
+    max-width: 520px;
+    line-height: 1.65;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 13px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.80);
+  }
+  .badge-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #A78BFA;
+    flex-shrink: 0;
+  }
+
+  /* ── BODY ── */
+  .body { padding: 0 56px 48px; }
+
+  /* ── SECTION ── */
+  .section { padding-top: 40px; }
+
+  .section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  /* ── WAT IS HET ── */
+  .what-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .what-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 17px 19px;
+  }
+  .what-icon { font-size: 21px; display: block; margin-bottom: 7px; }
+  .what-card-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .what-card-text {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  .what-hl {
+    background: var(--accent-lt);
+    border: 1px solid #C4B5FD;
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .what-hl-icon { font-size: 18px; flex-shrink: 0; }
+  .what-hl-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-dk);
+    line-height: 1.45;
+  }
+
+  /* ── HR ── */
+  .hr { height: 1px; background: var(--border); margin: 36px 0 0; }
+
+  /* ── HOE WERKT HET ── */
+  .steps {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 27px; left: 36px; right: 36px;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    padding: 0 8px;
+  }
+  .step-num {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 2px var(--accent);
+    margin-bottom: 11px;
+    flex-shrink: 0;
+  }
+  .step-lbl {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin-bottom: 3px;
+  }
+  .step-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 5px;
+  }
+  .step-text {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* ── ROI ── */
+  .roi-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .roi-table {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .roi-thead {
+    background: var(--ink);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 9px 15px;
+  }
+  .roi-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+  }
+  .roi-row:last-child { border-bottom: none; }
+  .roi-label { color: var(--ink-soft); }
+  .roi-val { font-weight: 700; color: var(--ink); }
+  .roi-row.hl { background: var(--green-lt); }
+  .roi-row.hl .roi-label { color: var(--green); font-weight: 700; }
+  .roi-row.hl .roi-val { color: var(--green); font-size: 14px; }
+
+  .roi-result {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dk) 100%);
+    border-radius: var(--radius);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .roi-res-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 6px;
+  }
+  .roi-res-num {
+    font-size: 54px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -2.5px;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .roi-res-sub {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+  .roi-res-pill {
+    background: rgba(255,255,255,0.14);
+    border-radius: 8px;
+    padding: 9px 15px;
+    width: 100%;
+  }
+  .roi-pill-lbl {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+  }
+  .roi-pill-val {
+    font-size: 19px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .plan {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 17px;
+    position: relative;
+    background: var(--surface);
+  }
+  .plan.pop { border-color: var(--accent); }
+  .pop-badge {
+    position: absolute;
+    top: -11px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-muted);
+    margin-bottom: 7px;
+  }
+  .plan-price {
+    font-size: 33px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: -1.5px;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .plan-price sup {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    vertical-align: super;
+  }
+  .plan-period {
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+  .plan-feats {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .plan-feat {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+  .feat-check { color: var(--green); flex-shrink: 0; margin-top: 1px; font-size: 12px; }
+
+  /* ── CTA ── */
+  .cta {
+    margin-top: 34px;
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 28px 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+  .cta-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .cta-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.57);
+    line-height: 1.55;
+    max-width: 400px;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 18px 56px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: var(--ink-muted);
+  }
+  .footer strong { color: var(--ink-soft); }
+
+  /* ── PRINT ── */
+  @media print {
+    html, body { background: white; }
+    .page { margin: 0; border-radius: 0; box-shadow: none; max-width: 100%; }
+    .hero, .step-num, .roi-result, .plan.pop, .cta {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 660px) {
+    .hero { padding: 32px 24px 28px; }
+    .hero h1 { font-size: 26px; }
+    .body { padding: 0 24px 36px; }
+    .what-grid, .roi-wrap, .pricing-grid { grid-template-columns: 1fr; }
+    .steps { flex-direction: column; gap: 20px; }
+    .steps::before { display: none; }
+    .cta { flex-direction: column; align-items: flex-start; }
+    .footer { flex-direction: column; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <header class="hero">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="5" width="16" height="12" rx="2" fill="white" opacity="0.9"/>
+          <circle cx="10" cy="11" r="3.5" stroke="rgba(124,58,237,0.9)" stroke-width="1.8" fill="none"/>
+          <circle cx="10" cy="11" r="1.4" fill="rgba(124,58,237,0.9)"/>
+          <rect x="7.5" y="3" width="5" height="2.5" rx="1" fill="white" opacity="0.65"/>
+          <circle cx="15.5" cy="7" r="0.9" fill="rgba(255,255,255,0.45)"/>
+        </svg>
+      </div>
+      <span class="logo-name">Mononium</span>
+    </div>
+
+    <h1 data-pt>Bied <em>AI photobooths</em> aan op elk event.<br>Meer omzet, meer wow.</h1>
+
+    <p class="hero-sub" data-pt>
+      Mononium is het SaaS-platform waarmee event agencies in minuten een AI-gestuurde photobooth lanceren — zonder hardware, zonder gedoe, met spectaculaire resultaten voor hun klanten.
+    </p>
+
+    <div class="badges">
+      <span class="badge"><span class="badge-dot"></span>Geen hardware vereist</span>
+      <span class="badge"><span class="badge-dot"></span>White-label voor agencies</span>
+      <span class="badge"><span class="badge-dot"></span>Live in 5 minuten</span>
+      <span class="badge"><span class="badge-dot"></span>NL &amp; BE support</span>
+    </div>
+  </header>
+
+  <!-- ── BODY ── -->
+  <main class="body">
+
+    <!-- WAT IS HET -->
+    <section class="section" aria-labelledby="h-wat">
+      <div class="section-label">Wat is het</div>
+      <h2 class="section-title" id="h-wat">Een compleet AI photobooth platform voor agencies</h2>
+
+      <div class="what-grid">
+        <div class="what-card">
+          <span class="what-icon">📸</span>
+          <div class="what-card-title">AI-gegenereerde foto-ervaringen</div>
+          <p class="what-card-text" data-pt>Gasten stappen in een virtuele booth, selecteren een thema en ontvangen binnen seconden professionele AI-foto's — gestyled naar het event.</p>
+        </div>
+        <div class="what-card">
+          <span class="what-icon">🏷️</span>
+          <div class="what-card-title">Volledig white-label</div>
+          <p class="what-card-text" data-pt>Jouw agency-naam, jouw huisstijl, jouw branding. Klanten zien alleen jouw merk — Mononium blijft onzichtbaar op de achtergrond.</p>
+        </div>
+        <div class="what-card">
+          <span class="what-icon">⚡</span>
+          <div class="what-card-title">Instant setup per event</div>
+          <p class="what-card-text" data-pt>Configureer de booth in minuten via het dashboard: thema, kleuren, filters, sharingopties. Geen technische kennis vereist.</p>
+        </div>
+        <div class="what-card">
+          <span class="what-icon">📲</span>
+          <div class="what-card-title">Direct deelbaar via QR</div>
+          <p class="what-card-text" data-pt>Gasten scannen een QR-code met hun telefoon, maken AI-foto's en delen ze direct op social media. Gratis marketing voor jouw klant.</p>
+        </div>
+      </div>
+
+      <div class="what-hl">
+        <span class="what-hl-icon">💡</span>
+        <div class="what-hl-text" data-pt>Ideaal voor: bedrijfsevents, productlanceringen, beurzen, galas, teambuildings, festivals en bruiloften.</div>
+      </div>
+    </section>
+
+    <div class="hr"></div>
+
+    <!-- HOE WERKT HET -->
+    <section class="section" aria-labelledby="h-hoe">
+      <div class="section-label">Hoe werkt het</div>
+      <h2 class="section-title" id="h-hoe">Drie stappen van aanmelding tot live booth</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-lbl">Stap 1</div>
+          <div class="step-title">Abonnement kiezen</div>
+          <p class="step-text" data-pt>Kies het pakket dat bij jouw volume past en krijg direct toegang tot het dashboard en alle AI-tools.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-lbl">Stap 2</div>
+          <div class="step-title">Event configureren</div>
+          <p class="step-text" data-pt>Stel in minuten de booth in per event: thema, branding, filters en QR-code. Klaar voor gebruik.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-lbl">Stap 3</div>
+          <div class="step-title">Gasten genieten &amp; delen</div>
+          <p class="step-text" data-pt>Gasten scannen de QR, maken AI-foto's en delen direct. Jij factureert de photobooth als premium add-on.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="hr"></div>
+
+    <!-- ROI -->
+    <section class="section" aria-labelledby="h-roi">
+      <div class="section-label">ROI-berekening</div>
+      <h2 class="section-title" id="h-roi">Realistisch voorbeeld: middelgrote event agency</h2>
+
+      <div class="roi-wrap">
+        <div class="roi-table">
+          <div class="roi-thead">Inkomsten</div>
+          <div class="roi-row">
+            <span class="roi-label">Events per maand</span>
+            <span class="roi-val">8 events</span>
+          </div>
+          <div class="roi-row">
+            <span class="roi-label">Extra omzet per event</span>
+            <span class="roi-val">€ 600</span>
+          </div>
+          <div class="roi-row">
+            <span class="roi-label">Bruto extra omzet/maand</span>
+            <span class="roi-val">€ 4.800</span>
+          </div>
+          <div class="roi-thead" style="background:#374151">Kosten</div>
+          <div class="roi-row">
+            <span class="roi-label">Mononium abonnement</span>
+            <span class="roi-val">€ 449</span>
+          </div>
+          <div class="roi-row hl">
+            <span class="roi-label">Netto winst per maand</span>
+            <span class="roi-val">€ 4.351</span>
+          </div>
+        </div>
+
+        <div class="roi-result">
+          <div class="roi-res-lbl">Gemiddelde ROI</div>
+          <div class="roi-res-num">469%</div>
+          <div class="roi-res-sub" data-pt>Op het Growth-abonnement voor een agency met 8 events per maand</div>
+          <div class="roi-res-pill">
+            <div class="roi-pill-lbl">Terugverdientijd</div>
+            <div class="roi-pill-val">&lt; 1 event</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hr"></div>
+
+    <!-- PRICING -->
+    <section class="section" aria-labelledby="h-pricing">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title" id="h-pricing">Transparante maandprijzen, geen setup-kosten</h2>
+
+      <div class="pricing-grid">
+
+        <div class="plan">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price"><sup>€</sup>229</div>
+          <div class="plan-period">per maand excl. btw</div>
+          <ul class="plan-feats">
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Tot 5 events per maand</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>AI photobooth met standaardthema's</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>QR-code sharing voor gasten</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Basis analytics dashboard</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Email support</span></li>
+          </ul>
+        </div>
+
+        <div class="plan pop">
+          <div class="pop-badge">Meest gekozen</div>
+          <div class="plan-name">Growth</div>
+          <div class="plan-price"><sup>€</sup>449</div>
+          <div class="plan-period">per maand excl. btw</div>
+          <ul class="plan-feats">
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Tot 15 events per maand</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Custom branding &amp; thema's per event</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>White-label QR-pagina's</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Geavanceerde analytics &amp; exports</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Prioriteit chat support</span></li>
+          </ul>
+        </div>
+
+        <div class="plan">
+          <div class="plan-name">Scale</div>
+          <div class="plan-price"><sup>€</sup>849</div>
+          <div class="plan-period">per maand excl. btw</div>
+          <ul class="plan-feats">
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Onbeperkt events</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Volledig white-label platform</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Dedicated onboarding &amp; CSM</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>API-toegang &amp; custom integraties</span></li>
+            <li class="plan-feat"><span class="feat-check">✓</span><span data-pt>Priority support 24/7</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta">
+      <div>
+        <div class="cta-title" data-pt>Klaar om te starten? Plan een gratis demo.</div>
+        <p class="cta-sub" data-pt>In 20 minuten laten we je precies zien hoe het werkt — inclusief een live demo van de AI photobooth. Geen verplichtingen.</p>
+      </div>
+      <a href="[DEMO_LINK_HIER]" class="cta-btn">Plan gratis demo →</a>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <strong>Mononium</strong>
+    <span>AI Photobooth SaaS voor Event Agencies · NL &amp; BE</span>
+    <span>© 2026 Mononium</span>
+  </footer>
+
+</div>
+
+<script type="module">
+import { prepare, layout } from 'https://esm.sh/@chenglou/pretext@0.4.1';
+
+await document.fonts.ready;
+
+const els = document.querySelectorAll('[data-pt]');
+const store = new Map();
+
+for (const el of els) {
+  const text = el.textContent;
+  if (!text.trim()) continue;
+  const font = getComputedStyle(el).font;
+  try { store.set(el, prepare(text, font)); } catch {}
+}
+
+function relayout() {
+  for (const [el, handle] of store) {
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || 22;
+    const { height } = layout(handle, el.clientWidth, lh);
+    el.style.height = `${Math.ceil(height)}px`;
+  }
+}
+
+new ResizeObserver(relayout).observe(document.body);
+relayout();
+</script>
+
+</body>
+</html>

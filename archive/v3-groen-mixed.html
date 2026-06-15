@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mononium, AI photobooth voor event agencies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #FAFAF6;
+    --bg-soft:   #F2F1EB;
+    --ink:       #0A0A0A;
+    --ink-2:     #4A4A45;
+    --ink-3:     #8B8B85;
+    --line:      #0A0A0A;
+    --line-soft: rgba(10, 10, 10, 0.12);
+    --accent:    #00B86B;
+    --accent-dk: #008F54;
+    --accent-soft: rgba(0, 184, 107, 0.12);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #0A0A0A;
+      --bg-soft:   #161616;
+      --ink:       #FAFAF6;
+      --ink-2:     #C8C8C2;
+      --ink-3:     #9A9A92;
+      --line:      #FAFAF6;
+      --line-soft: rgba(250, 250, 246, 0.20);
+      --accent:    #00D26A;
+      --accent-dk: #00B86B;
+      --accent-soft: rgba(0, 210, 106, 0.18);
+    }
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'ss01' on, 'cv11' on;
+    overflow-x: hidden;
+  }
+
+  .mono {
+    font-family: 'Geist Mono', ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-feature-settings: 'ss01' on, 'cv11' on, 'zero' on;
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── HEADER ── */
+  .top {
+    border-bottom: 1px solid var(--line);
+    padding: 24px 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+  .top-logo {
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .top-logo-mark {
+    width: 14px; height: 14px;
+    background: var(--ink);
+    position: relative;
+  }
+  .top-logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--accent);
+  }
+  .top-logo-mark::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 4px; height: 4px;
+    background: var(--ink);
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+  .top-nav { display: flex; align-items: center; gap: 28px; }
+  .top-nav a {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    position: relative;
+  }
+  .top-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.25s ease;
+  }
+  .top-nav a:hover { color: var(--accent); }
+  .top-nav a:hover::after { width: 100%; }
+  .top-cta {
+    border: 1px solid var(--ink);
+    padding: 8px 14px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+  }
+  .top-cta:hover { background: var(--ink); color: var(--bg); }
+  .top-cta:hover .top-cta-arrow { transform: translateX(2px); }
+  .top-cta-arrow { display: inline-block; transition: transform 0.2s ease; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 110px 0 96px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-kicker {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-kicker::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+  .hero h1 {
+    font-family: 'Geist', sans-serif;
+    font-size: clamp(40px, 7vw, 88px);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    color: var(--ink);
+    max-width: 14ch;
+    margin-bottom: 32px;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 52ch;
+    margin-bottom: 48px;
+    font-weight: 400;
+  }
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 96px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 14px 22px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--ink);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--accent);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+  .btn-primary:hover::before { left: 0; }
+  .btn-primary > * { position: relative; z-index: 1; }
+  .btn-primary .arrow { transition: transform 0.3s ease; }
+  .btn-primary:hover .arrow { transform: translateX(4px); }
+  .btn-ghost {
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 2px;
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+  }
+  .btn-ghost:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .stat {
+    padding: 28px 24px;
+    border-right: 1px solid var(--line-soft);
+    position: relative;
+    transition: background 0.2s ease;
+  }
+  .stat:hover { background: var(--accent-soft); }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .stat-num em { font-style: normal; color: var(--accent); font-size: 0.7em; margin-left: 1px; }
+  .stat-lbl {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── SHOWCASE ── */
+  .showcase {
+    padding: 110px 0 110px;
+    border-bottom: 1px solid var(--line);
+  }
+  .showcase-head {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    margin-bottom: 56px;
+  }
+  .showcase-kicker {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    padding-top: 12px;
+  }
+  .showcase-kicker em {
+    font-style: normal;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .showcase-title {
+    font-family: 'Geist', sans-serif;
+    font-size: clamp(32px, 4.5vw, 52px);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    max-width: 18ch;
+  }
+  .showcase-title em { font-style: normal; color: var(--accent); }
+  .showcase-sub {
+    font-size: 16px;
+    color: var(--ink-2);
+    max-width: 56ch;
+    margin-top: 20px;
+    line-height: 1.55;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto auto;
+    gap: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .showcase-item {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-soft);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .showcase-item:hover { transform: translateY(-3px); }
+  .showcase-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%);
+    pointer-events: none;
+  }
+  .item-1 { grid-column: span 7; aspect-ratio: 16/10; }
+  .item-2 { grid-column: span 5; aspect-ratio: 4/3; }
+  .item-3 { grid-column: span 4; aspect-ratio: 1/1; }
+  .item-4 { grid-column: span 4; aspect-ratio: 1/1; }
+  .item-5 { grid-column: span 4; aspect-ratio: 4/5; }
+  .style-aurora {
+    background-image: linear-gradient(135deg, #FFD8B5 0%, #FF9985 45%, #C77FFF 100%);
+  }
+  .style-pencil {
+    background-image: linear-gradient(135deg, #FAF8F2 0%, #E0D9C5 60%, #B8B095 100%);
+    filter: grayscale(0.4) contrast(0.95);
+  }
+  .style-watercolor {
+    background-image: linear-gradient(135deg, #FFE0D5 0%, #D8E5F5 50%, #E8D8F5 100%);
+  }
+  .style-ink {
+    background-image: linear-gradient(135deg, #2C2C3A 0%, #0F0F1F 100%);
+  }
+  .style-coral {
+    background-image: linear-gradient(135deg, #FFB89A 0%, #FF7050 50%, #D63F8C 100%);
+  }
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 18px 20px;
+    z-index: 1;
+  }
+  .photo-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+    align-self: flex-start;
+    padding: 5px 9px;
+    background: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .photo-meta {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.95);
+    align-self: flex-end;
+    text-align: right;
+  }
+  .photo-meta strong {
+    display: block;
+    font-weight: 500;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  .showcase-swatches {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .swatch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 8px 8px;
+    border: 1px solid var(--line-soft);
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .swatch:hover { border-color: var(--ink); color: var(--ink); }
+  .swatch-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 2px;
+  }
+  .swatch-mark.aurora { background: linear-gradient(135deg, #FFD8B5 0%, #C77FFF 100%); }
+  .swatch-mark.pencil { background: linear-gradient(135deg, #FAF8F2 0%, #B8B095 100%); }
+  .swatch-mark.watercolor { background: linear-gradient(135deg, #FFE0D5 0%, #E8D8F5 100%); }
+  .swatch-mark.ink { background: linear-gradient(135deg, #2C2C3A 0%, #0F0F1F 100%); }
+  .swatch-mark.coral { background: linear-gradient(135deg, #FFB89A 0%, #D63F8C 100%); }
+  .swatch-more {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-left: auto;
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 110px 0; border-bottom: 1px solid var(--line); }
+  .sec-head {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    margin-bottom: 72px;
+  }
+  .sec-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    padding-top: 12px;
+  }
+  .sec-num { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
+  .sec-title {
+    font-family: 'Geist', sans-serif;
+    font-size: clamp(32px, 4.5vw, 52px);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    max-width: 18ch;
+  }
+  .sec-title em { font-style: normal; color: var(--accent); }
+  .sec-sub {
+    font-size: 16px;
+    color: var(--ink-2);
+    max-width: 56ch;
+    margin-top: 20px;
+    line-height: 1.55;
+  }
+
+  /* ── WAT ── */
+  .wat-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line);
+  }
+  .wat-item {
+    padding: 36px 28px 28px;
+    border-right: 1px solid var(--line-soft);
+    position: relative;
+  }
+  .wat-item:nth-child(3) { border-right: none; }
+  .wat-item::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0;
+    width: 40px; height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .wat-item:hover::before { transform: scaleX(1); }
+  .wat-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    margin-bottom: 36px;
+  }
+  .wat-title {
+    font-family: 'Geist', sans-serif;
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .wat-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  /* ── HOE ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line);
+  }
+  .step {
+    padding: 36px 28px 28px;
+    border-right: 1px solid var(--line-soft);
+    position: relative;
+  }
+  .step:nth-child(3) { border-right: none; }
+  .step::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0;
+    width: 40px; height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .step:hover::before { transform: scaleX(1); }
+  .step-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 28px;
+  }
+  .step-title {
+    font-family: 'Geist', sans-serif;
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .step-text { font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+
+  /* ── ROI ── */
+  .roi-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 0;
+    border: 1px solid var(--line);
+  }
+  .roi-table { padding: 0; }
+  .roi-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 14px;
+    transition: background 0.2s ease;
+  }
+  .roi-row:hover { background: var(--bg-soft); }
+  .roi-row:last-child { border-bottom: none; }
+  .roi-row.hl { background: var(--ink); color: var(--bg); }
+  .roi-row .lbl { color: var(--ink-2); }
+  .roi-row.hl .lbl { color: var(--bg); opacity: 0.7; }
+  .roi-row .val { font-family: 'Geist Mono', monospace; font-weight: 500; }
+  .roi-row.hl .val { color: var(--accent); font-size: 16px; }
+  .roi-row .val em { font-style: normal; color: var(--accent); }
+
+  @media (prefers-color-scheme: dark) {
+    .roi-row.hl {
+      background: var(--bg-soft);
+      color: var(--ink);
+      box-shadow: inset 3px 0 0 0 var(--accent);
+    }
+    .roi-row.hl .lbl { color: var(--ink-2); opacity: 1; }
+  }
+  .roi-divider {
+    background: var(--bg-soft);
+    color: var(--ink-3);
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 24px;
+  }
+  .roi-headline {
+    background: var(--ink);
+    color: var(--bg);
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 100%;
+  }
+  .roi-headline-main {
+    padding: 56px 36px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .roi-headline-top {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bg);
+    opacity: 0.5;
+    margin-bottom: 24px;
+  }
+  .roi-headline-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 124px;
+    font-weight: 500;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .roi-headline-num .pct {
+    font-size: 0.55em;
+    vertical-align: top;
+    margin-left: -2px;
+  }
+  .roi-headline-sub {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--bg);
+    opacity: 0.75;
+    max-width: 30ch;
+  }
+  .roi-headline-meta {
+    padding: 22px 36px;
+    border-top: 1px solid rgba(250, 250, 246, 0.18);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .roi-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .roi-meta-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--bg);
+  }
+  .roi-meta-lbl {
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    color: var(--bg);
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--line);
+  }
+  .plan {
+    padding: 36px 32px 32px;
+    border-right: 1px solid var(--line-soft);
+    display: flex;
+    flex-direction: column;
+    transition: background 0.2s ease;
+  }
+  .plan:hover { background: var(--bg-soft); }
+  .plan:nth-child(3) { border-right: none; }
+  .plan-name {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 48px;
+  }
+  .plan-price {
+    font-family: 'Geist', sans-serif;
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .plan-price sup {
+    font-size: 22px;
+    font-weight: 500;
+    vertical-align: super;
+    color: var(--ink-2);
+    margin-right: 2px;
+  }
+  .plan-period {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+    margin-bottom: 36px;
+  }
+  .plan-feats {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 36px;
+    flex: 1;
+  }
+  .plan-feat {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 10px;
+  }
+  .plan-feat::before {
+    content: '';
+    width: 8px; height: 1px;
+    background: var(--ink-3);
+    margin-top: 10px;
+  }
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .plan-cta::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--ink);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+  .plan-cta > * { position: relative; z-index: 1; }
+  .plan-cta:hover::before { left: 0; }
+  .plan-cta:hover { color: var(--bg); }
+  .plan.pop .plan-cta {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .plan.pop .plan-cta::before { background: var(--accent); }
+  .plan.pop .plan-cta:hover::before { left: 0; }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 140px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .cta-kicker {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+  }
+  .cta-title {
+    font-family: 'Geist', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .cta-title em { font-style: normal; color: var(--accent); }
+  .cta-sub {
+    font-size: 16px;
+    color: var(--ink-2);
+    margin-bottom: 44px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 36px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-l, .footer-r {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .footer-mid { display: flex; gap: 24px; }
+  .footer-mid a {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+  .footer-mid a:hover { color: var(--accent); }
+
+  /* ── ANIMATIONS: REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 880px) {
+    .page { padding: 0 20px; }
+    .top-nav { display: none; }
+    .top { padding: 18px 0 16px; }
+    .hero { padding: 56px 0 56px; }
+    .hero h1 { font-size: clamp(32px, 8vw, 48px); }
+    .hero-actions { flex-direction: column; align-items: flex-start; gap: 18px; margin-bottom: 56px; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .stat { border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+    .stat:nth-child(2n) { border-right: none; }
+    .stat:nth-last-child(-n+2) { border-bottom: none; }
+    section { padding: 64px 0; }
+    .sec-head { grid-template-columns: 1fr; gap: 16px; margin-bottom: 36px; }
+    .wat-list, .steps, .pricing-grid { grid-template-columns: 1fr; }
+    .wat-item, .step, .plan { border-right: none; border-bottom: 1px solid var(--line-soft); padding: 28px 0; }
+    .wat-item:nth-child(2), .wat-item:nth-child(3), .step:nth-child(2), .step:nth-child(3), .plan:nth-child(2), .plan:nth-child(3) { padding-left: 0; }
+    .wat-item:last-child, .step:last-child, .plan:last-child { border-bottom: none; }
+    .roi-grid { grid-template-columns: 1fr; }
+    .roi-headline-num { font-size: 80px; }
+    footer { flex-direction: column; gap: 16px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── TOP ── -->
+  <header class="top">
+    <div class="top-logo">
+      <span class="top-logo-mark"></span>
+      <span>Mononium</span>
+    </div>
+    <nav class="top-nav">
+      <a href="#wat">Product</a>
+      <a href="#hoe">Workflow</a>
+      <a href="#roi">ROI</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a href="#cta" class="top-cta">Plan demo <span class="top-cta-arrow">→</span></a>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-kicker">
+      <span>AI Photobooth / voor event agencies / v3.0</span>
+    </div>
+    <h1>Bied <em>AI photobooths</em> aan op elk event. Meer omzet, meer wow.</h1>
+    <p class="hero-sub">Mononium is het SaaS-platform waarmee event agencies in minuten een AI-gestuurde photobooth lanceren, zonder hardware, zonder gedoe, met meetbare Brand Impact voor hun klanten.</p>
+    <div class="hero-actions">
+      <a href="#cta" class="btn-primary"><span>Plan een gratis demo</span><span class="arrow">→</span></a>
+      <a href="#wat" class="btn-ghost">Bekijk hoe het werkt</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num"><span data-count="8">0</span><em>s</em></div>
+        <div class="stat-lbl">Generatie per foto</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span data-count="0">0</span></div>
+        <div class="stat-lbl">Hardware vereist</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span data-count="100">0</span><em>%</em></div>
+        <div class="stat-lbl">White-label</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span data-count="5">0</span><em>min</em></div>
+        <div class="stat-lbl">Setup per event</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WAT ── -->
+  <section id="wat">
+    <div class="sec-head" data-anim="fade-up">
+      <div class="sec-label">
+        <div class="sec-num">/01</div>
+        <div>Wat het is</div>
+      </div>
+      <div>
+        <h2 class="sec-title">Eén <em>platform</em>, alle AI photobooth-functionaliteit die een agency nodig heeft.</h2>
+        <p class="sec-sub">Gebouwd voor agencies die photobooths als premium add-on willen verkopen, niet als kostenpost met logistiek.</p>
+      </div>
+    </div>
+
+    <div class="wat-list" data-anim-stagger>
+      <div class="wat-item">
+        <div class="wat-num">/ 01</div>
+        <h3 class="wat-title">AI-foto's, direct van de telefoon van de gast.</h3>
+        <p class="wat-text">Geen booth, geen fotograaf. Gasten scannen een QR, kiezen een stijl en krijgen binnen 8 seconden een professioneel gestileerde AI-foto. Download en deel via elk kanaal.</p>
+      </div>
+      <div class="wat-item">
+        <div class="wat-num">/ 02</div>
+        <h3 class="wat-title">Volledig white-label, jouw merk overal zichtbaar.</h3>
+        <p class="wat-text">Jouw agency, jouw branding, jouw kleuren. Mononium is onzichtbaar, jouw klant ziet alleen jouw merk, van QR-pagina tot eindresultaat. Prijzen onder jouw naam.</p>
+      </div>
+      <div class="wat-item">
+        <div class="wat-num">/ 03</div>
+        <h3 class="wat-title">Per event geconfigureerd in 5 minuten.</h3>
+        <p class="wat-text">Thema, filters, kleuren en sharing-opties via één dashboard. Geen technische kennis, geen developers. Je agency runt het zelf, of je klant, met een simpele share-link.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOE ── -->
+  <section id="hoe">
+    <div class="sec-head" data-anim="fade-up">
+      <div class="sec-label">
+        <div class="sec-num">/02</div>
+        <div>Hoe het werkt</div>
+      </div>
+      <div>
+        <h2 class="sec-title">Van aanmelding tot <em>live booth</em> in drie stappen.</h2>
+        <p class="sec-sub">Geen installatie, geen fysieke setup. Je agency heeft binnen een werkende photobooth op elk event dat je bedient.</p>
+      </div>
+    </div>
+
+    <div class="steps" data-anim-stagger>
+      <div class="step">
+        <div class="step-num">STAP / 01</div>
+        <h3 class="step-title">Kies abonnement en krijg dashboard-toegang.</h3>
+        <p class="step-text">Plan dat past bij je volume. Direct toegang tot het agency-dashboard, alle AI-tools, alle stijlen. Geen setup-gesprekken, geen onboarding-traject.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STAP / 02</div>
+        <h3 class="step-title">Configureer per event: thema, branding, QR.</h3>
+        <p class="step-text">Kies een stijl, zet je agency-branding in de witte labels, genereer een unieke QR-code. Copy-paste in de event-communicatie van je klant. Klaar voor gebruik.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STAP / 03</div>
+        <h3 class="step-title">Gasten genieten, delen, jij factureert.</h3>
+        <p class="step-text">Gasten maken AI-foto's via hun eigen telefoon, delen direct via social. Jij levert de photobooth als premium add-on met jouw marge, onder jouw merk.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ROI ── -->
+  <section id="roi">
+    <div class="sec-head" data-anim="fade-up">
+      <div class="sec-label">
+        <div class="sec-num">/03</div>
+        <div>ROI</div>
+      </div>
+      <div>
+        <h2 class="sec-title">Rekenvoorbeeld voor een <em>middelgrote agency</em>.</h2>
+        <p class="sec-sub">Een Growth-abonnement van €449 verdient zichzelf terug na minder dan één event. De rest is marge.</p>
+      </div>
+    </div>
+
+    <div class="roi-grid" data-anim="fade-up" data-delay="0.1">
+      <div class="roi-table">
+        <div class="roi-divider">Inkomsten / maand</div>
+        <div class="roi-row">
+          <span class="lbl">Events per maand</span>
+          <span class="val">8</span>
+        </div>
+        <div class="roi-row">
+          <span class="lbl">Extra omzet per event</span>
+          <span class="val"><em>€</em> 600</span>
+        </div>
+        <div class="roi-row">
+          <span class="lbl">Bruto extra omzet</span>
+          <span class="val"><em>€</em> 4.800</span>
+        </div>
+        <div class="roi-divider">Kosten / maand</div>
+        <div class="roi-row">
+          <span class="lbl">Mononium abonnement</span>
+          <span class="val"><em>€</em> 449</span>
+        </div>
+        <div class="roi-row hl">
+          <span class="lbl">Netto winst</span>
+          <span class="val"><em>€</em> 4.351</span>
+        </div>
+      </div>
+
+      <div class="roi-headline">
+        <div class="roi-headline-main">
+          <div class="roi-headline-top">/ 03.1 / Gemiddelde ROI</div>
+          <div class="roi-headline-num"><span data-count="469">0</span><span class="pct">%</span></div>
+          <p class="roi-headline-sub">Op het Growth-abonnement bij 8 events per maand.</p>
+        </div>
+        <div class="roi-headline-meta">
+          <div class="roi-meta-item">
+            <div class="roi-meta-num">&lt; 1</div>
+            <div class="roi-meta-lbl">Event payback</div>
+          </div>
+          <div class="roi-meta-item">
+            <div class="roi-meta-num">970%</div>
+            <div class="roi-meta-lbl">Jaar-% op abo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ── -->
+  <section id="pricing">
+    <div class="sec-head" data-anim="fade-up">
+      <div class="sec-label">
+        <div class="sec-num">/04</div>
+        <div>Pricing</div>
+      </div>
+      <div>
+        <h2 class="sec-title">Transparante maandprijzen. <em>Geen setup-kosten.</em></h2>
+        <p class="sec-sub">Kies het plan dat past bij je volume. Op elk moment op- of afschalen, geen contracten langer dan een maand.</p>
+      </div>
+    </div>
+
+    <div class="pricing-grid" data-anim-stagger>
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price"><sup>€</sup>229</div>
+        <div class="plan-period">per maand, excl. btw</div>
+        <ul class="plan-feats">
+          <li class="plan-feat"><span>Tot 5 events per maand</span></li>
+          <li class="plan-feat"><span>AI photobooth met standaardstijlen</span></li>
+          <li class="plan-feat"><span>QR-code sharing voor gasten</span></li>
+          <li class="plan-feat"><span>Basis analytics dashboard</span></li>
+          <li class="plan-feat"><span>Email support</span></li>
+        </ul>
+        <a href="#cta" class="plan-cta"><span>Start →</span></a>
+      </div>
+
+      <div class="plan pop">
+        <div class="plan-name">Growth</div>
+        <div class="plan-price"><sup>€</sup>449</div>
+        <div class="plan-period">per maand, excl. btw</div>
+        <ul class="plan-feats">
+          <li class="plan-feat"><span>Tot 15 events per maand</span></li>
+          <li class="plan-feat"><span>Custom branding per event</span></li>
+          <li class="plan-feat"><span>White-label QR-pagina's</span></li>
+          <li class="plan-feat"><span>Geavanceerde analytics & exports</span></li>
+          <li class="plan-feat"><span>Prioriteit chat support</span></li>
+        </ul>
+        <a href="#cta" class="plan-cta"><span>Start →</span></a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Scale</div>
+        <div class="plan-price"><sup>€</sup>849</div>
+        <div class="plan-period">per maand, excl. btw</div>
+        <ul class="plan-feats">
+          <li class="plan-feat"><span>Onbeperkt events</span></li>
+          <li class="plan-feat"><span>Volledig white-label platform</span></li>
+          <li class="plan-feat"><span>Dedicated CSM & onboarding</span></li>
+          <li class="plan-feat"><span>API-toegang & custom integraties</span></li>
+          <li class="plan-feat"><span>Priority support 24/7</span></li>
+        </ul>
+        <a href="#cta" class="plan-cta"><span>Start →</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="cta-section" id="cta">
+    <div class="cta-kicker" data-anim="fade-up">/ 05 / Klaar om te starten</div>
+    <h2 class="cta-title" data-anim="fade-up" data-delay="0.1">Plan een <em>gratis demo</em>.</h2>
+    <p class="cta-sub" data-anim="fade-up" data-delay="0.2">20 minuten, live demo van de AI photobooth. Geen verplichtingen, geen sales-pitch.</p>
+    <a href="[DEMO_LINK_HIER]" class="btn-primary" data-anim="fade-up" data-delay="0.3"><span>Plan demo</span><span class="arrow">→</span></a>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-l">© 2026 / Mononium</div>
+    <div class="footer-mid">
+      <a href="#">NL</a>
+      <a href="#">BE</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+    <div class="footer-r">v3 / 14-jun-2026</div>
+  </footer>
+
+</div>
+
+<!-- GSAP + ScrollTrigger via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Respect reduced motion
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Hero on load
+    if (!prefersReduced) {
+      gsap.from('.hero h1', { y: 24, opacity: 0, duration: 0.9, ease: 'power3.out' });
+      gsap.from('.hero-kicker, .hero-sub, .hero-actions', {
+        y: 16, opacity: 0, duration: 0.7, stagger: 0.12, delay: 0.15, ease: 'power3.out'
+      });
+      gsap.from('.stat', { y: 12, opacity: 0, duration: 0.5, stagger: 0.08, delay: 0.4, ease: 'power3.out' });
+    }
+
+    // Generic fade-up for any [data-anim="fade-up"]
+    document.querySelectorAll('[data-anim="fade-up"]').forEach((el) => {
+      const delay = parseFloat(el.dataset.delay || 0);
+      if (prefersReduced) { el.style.opacity = 1; return; }
+      gsap.from(el, {
+        y: 20, opacity: 0, duration: 0.8, delay, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
+      });
+    });
+
+    // Stagger fade-up for [data-anim-stagger]
+    document.querySelectorAll('[data-anim-stagger]').forEach((el) => {
+      if (prefersReduced) return;
+      gsap.from(el.children, {
+        y: 20, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+    });
+
+    // Count-up for [data-count]
+    const counters = document.querySelectorAll('[data-count]');
+    counters.forEach((el) => {
+      const target = parseFloat(el.dataset.count);
+      const obj = { v: 0 };
+      if (prefersReduced) { el.textContent = target; return; }
+      gsap.to(obj, {
+        v: target, duration: 1.8, ease: 'power2.out',
+        onUpdate: () => { el.textContent = Math.round(obj.v); },
+        scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+    });
+  } else {
+    // Fallback: set all counts to target instantly
+    document.querySelectorAll('[data-count]').forEach((el) => { el.textContent = el.dataset.count; });
+  }
+</script>
+
+</body>
+</html>
